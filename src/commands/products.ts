@@ -1,20 +1,7 @@
-import fetch from 'node-fetch'
-import * as fs from 'fs'
-
-import { API_BASE } from '../config'
-import { getAccessToken } from '../helpers/storage'
-import { reAuth } from '../helpers/auth'
 import { getStdin } from '../helpers/process'
+import client from '../helpers/client'
 
-// TODO: Add to definition file
-interface ApiResponse {
-  errors?: Array<object>
-  data?: Array<object>
-}
-
-const get = async (id?: string, cmd?: { all: any; }) => {
-  await reAuth()
-
+const get = (id?: string, cmd?: { all: any; }): Promise<void> => {
   if (cmd.all) {
     return getAll()
   } else if (id) {
@@ -25,21 +12,16 @@ const get = async (id?: string, cmd?: { all: any; }) => {
   process.exit(1)
 }
 
-const getOne = async (id: string, cmd: any) => {
-  const response = await fetch(`${API_BASE}/v2/products/${id}`, {
-    headers: {
-      Authorization: `Bearer ${getAccessToken()}`,
-    }
-  })
-  // TODO: Needs catching
+const getOne = async (id: string, cmd: any): Promise<void> => {
+  const response = await client
+    .get(`products/${id}`)
 
-  const json: ApiResponse = await response.json()
-  if (json.errors) {
-    console.log(json.errors)
-    process.exit(1)
+  if ( ! response) {
+    console.error('Could not find product')
+    return
   }
+  const data = response.data
 
-  const data = json.data
   let output: object
 
   // Gets the fields from the data that the user requested
@@ -59,18 +41,14 @@ const getOne = async (id: string, cmd: any) => {
   }
 }
 
-const getAll = async () => {
-  const response = await fetch(`${API_BASE}/v2/products`, {
-    headers: {
-      Authorization: `Bearer ${getAccessToken()}`,
-    }
-  })
+const getAll = async (): Promise<void> => {
+  const response = await client
+    .get('products')
 
-  const json = await response.json()
-  console.log(json.data)
+  console.log(response.data)
 }
 
-const update = async (id: string, cmd: any) => {
+const update = async (id: string, cmd: any): Promise<void> => {
   const input: any = await getStdin()
 
   // The ID was piped in from another command
@@ -79,10 +57,8 @@ const update = async (id: string, cmd: any) => {
   }
 
   const payload: any = {
-    data: {
       id,
       type: 'product',
-    }
   }
 
   // TODO: How do we handle payloads?
@@ -91,24 +67,18 @@ const update = async (id: string, cmd: any) => {
   // Do we just use arguments?
   if (cmd.name) {
     // This can get pretty messy if everything is passed as an argument
-    payload.data.name = cmd.name
+    payload.name = cmd.name
   }
 
-  const response = await fetch(`${API_BASE}/v2/products/${id}`, {
-    method: 'PUT',
-    headers: {
-      // TODO: Abstract this
-      Authorization: `Bearer ${getAccessToken()}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
+  const response = await client
+    .put(`products/${id}`, payload)
 
-  const json: ApiResponse = await response.json()
-  console.log(json)
+  console.log(response.data)
 }
 
 export default {
   get,
+  getAll,
+  getOne,
   update,
 }
