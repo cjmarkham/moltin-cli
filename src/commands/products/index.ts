@@ -1,21 +1,23 @@
 import { Command, flags } from '@oclif/command'
+import { Input } from '@oclif/parser/lib/flags'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
 
 export default class ProductsIndex extends Command {
-  static description = 'Gets all products'
+  static description: string = 'Gets all products'
 
-  static examples = [
-    ``,
+  static examples: string[] = [
+    `moltin products`,
+    `moltin products --only id,name`,
   ]
 
-  static flags = {
+  static flags: Input<any> = {
     help: flags.help({ char: 'h' }),
     only: flags.string({ char: 'o' }),
   }
 
-  async run() {
+  async run(): Promise<void> {
     const { flags } = this.parse(ProductsIndex)
 
     const response = await client
@@ -26,20 +28,18 @@ export default class ProductsIndex extends Command {
       process.exit(1)
     }
 
-    const data = response.data
-
     let output: Product[] = []
 
     // Gets the fields from the data that the user requested
     if (flags.only) {
       const fields = flags.only.split(',')
-      for (const product of data) {
-        const p = {}
+      for (const product of response.data) {
+        const p: Product = {} as Product
         fields.forEach((f: string) => p[f] = product[f])
-        output.push(p as Product)
+        output.push(p)
       }
     } else {
-      output = data
+      output = response.data
     }
 
     console.log(output)

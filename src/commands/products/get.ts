@@ -1,25 +1,28 @@
 import { Command, flags } from '@oclif/command'
+import { IArg } from '@oclif/parser/lib/args'
+import { Input } from '@oclif/parser/lib/flags'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
 
 export default class ProductsGet extends Command {
-  static args = [
+  static args: IArg<string>[] = [
     { name: 'id' },
   ]
 
-  static description = 'Gets a single product'
+  static description: string = 'Gets a single product'
 
-  static examples = [
-    ``,
+  static examples: string[] = [
+    `moltin products:get {uuid}`,
+    `moltin products:get {uuid} --only id,name`,
   ]
 
-  static flags = {
+  static flags: Input<any> = {
     help: flags.help({ char: 'h' }),
     only: flags.string({ char: 'o' }),
   }
 
-  async run() {
+  async run(): Promise<void> {
     const { args, flags } = this.parse(ProductsGet)
 
     const response = await client
@@ -34,7 +37,7 @@ export default class ProductsGet extends Command {
 
     // Gets the fields from the data that the user requested
     if (flags.only) {
-      const fields = flags.only.split(',')
+      const fields: string[] = flags.only.split(',')
       fields.forEach((f: string) => output[f] = response.data[f])
     } else {
       output = response.data
