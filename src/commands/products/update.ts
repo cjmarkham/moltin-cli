@@ -2,6 +2,7 @@ import { Command, flags } from '@oclif/command'
 import { Input } from '@oclif/parser/lib/flags'
 import { IArg } from '@oclif/parser/lib/args'
 import chalk from 'chalk'
+import * as fs from 'fs'
 
 import client from '../../helpers/client'
 import { getStdin } from '../../helpers/process'
@@ -12,7 +13,7 @@ export default class ProductsUpdate extends Command {
     { name: 'id' },
   ]
 
-  static description: string = 'Gets a single product'
+  static description: string = 'Updates a single product'
 
   static examples: string[] = [
     `moltin products:update {uuid}`,
@@ -25,6 +26,8 @@ export default class ProductsUpdate extends Command {
     help: flags.help({ char: 'h' }),
     name: flags.string({ char: 'n', description: 'The new name of the product' }),
     json: flags.string({ char: 'j', description: 'A JSON object of attributes to update' }),
+    only: flags.string({ char: 'o', description: 'Only return a subset of fields' }),
+    file: flags.string({ char: 'f', description: 'A JSON file of update fields' }),
   }
 
   async run(): Promise<void> {
@@ -53,6 +56,20 @@ export default class ProductsUpdate extends Command {
       }
 
       Object.keys(fields).map((k) => payload[k] = fields[k])
+    } else if (flags.file) {
+      const buffer = fs.readFileSync(flags.file)
+      let json: object
+      try {
+        json = JSON.parse(buffer.toString())
+      } catch (e) {
+        console.error(chalk.redBright(`Could not parse JSON from ${flags.file}`))
+        process.exit(1)
+      }
+      for (const key in json) {
+        if (ProductsUpdate.allowedFields.indexOf(key) !== -1) {
+          payload[key] = json[key]
+        }
+      }
     } else {
       for (const key in flags) {
         if (ProductsUpdate.allowedFields.indexOf(key) !== -1) {
@@ -69,8 +86,17 @@ export default class ProductsUpdate extends Command {
       process.exit(1)
     }
 
-    const data: Product = response.data
-    console.log(data)
+    let output: Product = {} as Product
+
+    // Gets the fields from the data that the user requested
+    if (flags.only) {
+      const fields: string[] = flags.only.split(',')
+      fields.forEach((f: string) => output[f] = response.data[f])
+    } else {
+      output = response.data
+    }
+
+    console.log(output)
   }
 
   static allowedFields: string[] = ['name']

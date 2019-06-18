@@ -14,7 +14,7 @@ export default class ProductsIndex extends Command {
 
   static flags: Input<any> = {
     help: flags.help({ char: 'h' }),
-    only: flags.string({ char: 'o' }),
+    only: flags.string({ char: 'o', description: 'Only return a subset of fields' }),
   }
 
   async run(): Promise<void> {
