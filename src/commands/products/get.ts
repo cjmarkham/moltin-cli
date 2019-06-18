@@ -4,6 +4,7 @@ import { Input } from '@oclif/parser/lib/flags'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
+import { parseOutput } from '../../helpers/output';
 
 export default class ProductsGet extends Command {
   static args: IArg<string>[] = [
@@ -33,15 +34,7 @@ export default class ProductsGet extends Command {
       process.exit(1)
     }
 
-    let output: Product = {} as Product
-
-    // Gets the fields from the data that the user requested
-    if (flags.only) {
-      const fields: string[] = flags.only.split(',')
-      fields.forEach((f: string) => output[f] = response.data[f])
-    } else {
-      output = response.data
-    }
+    const output: Product = parseOutput(response.data, flags.only)
 
     if (process.stdout.isTTY) {
       console.log(output)
