@@ -6,10 +6,6 @@ const program = new commander.Command()
 program.version(version)
 
 program
-  .command('authenticate')
-  .action(commands.auth.getNewAccessToken)
-
-program
   .command('products [id]')
   .option('-a, --all', 'Get products')
   .option('--only <fields>', 'Return specific fields only')
