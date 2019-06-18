@@ -1,8 +1,5 @@
 import { MoltinClient } from '@moltin/request'
 import NodeStorageAdapter = require('@moltin/node-storage-adapter')
-import { config } from 'dotenv'
-
-config({ path: '../.env' })
 
 const {
   MOLTIN_API_BASE,

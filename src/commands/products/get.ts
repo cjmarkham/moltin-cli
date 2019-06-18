@@ -1,0 +1,49 @@
+import { Command, flags } from '@oclif/command'
+
+import client from '../../helpers/client'
+import { Product } from '../../schemas'
+
+export default class ProductsGet extends Command {
+  static args = [
+    { name: 'id' },
+  ]
+
+  static description = 'Gets a single product'
+
+  static examples = [
+    ``,
+  ]
+
+  static flags = {
+    help: flags.help({ char: 'h' }),
+    only: flags.string({ char: 'o' }),
+  }
+
+  async run() {
+    const { args, flags } = this.parse(ProductsGet)
+
+    const response = await client
+      .get(`products/${args.id}`)
+      .catch(console.error)
+
+    if ( ! response || ! response.data) {
+      process.exit(1)
+    }
+
+    let output: Product = {} as Product
+
+    // Gets the fields from the data that the user requested
+    if (flags.only) {
+      const fields = flags.only.split(',')
+      fields.forEach((f: string) => output[f] = response.data[f])
+    } else {
+      output = response.data
+    }
+
+    if (process.stdout.isTTY) {
+      console.log(output)
+    } else {
+      console.log(JSON.stringify(output))
+    }
+  }
+}

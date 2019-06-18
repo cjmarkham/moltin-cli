@@ -1,4 +1,0 @@
-#!/bin/sh
-
-SRCDIR=$(cd "$(dirname $0)/.."; pwd)
-exec "$SRCDIR/node_modules/.bin/ts-node" "$SRCDIR/moltin.ts" $@
