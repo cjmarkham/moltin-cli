@@ -1,54 +1,46 @@
 import { getStdin } from '../helpers/process'
 import client from '../helpers/client'
 
-const get = (id?: string, cmd?: { all: any; }): Promise<void> => {
-  if (cmd.all) {
-    return getAll()
-  } else if (id) {
-    return getOne(id, cmd)
-  }
+import { newResponseError } from '../helpers/errors'
+import { Product, ResponseError } from '../schemas'
 
-  console.log('Please provide a product UUID or the --all flag')
-  process.exit(1)
-}
-
-const getOne = async (id: string, cmd: any): Promise<void> => {
+const get = async (id: string, cmd: any): Promise<Product | ResponseError[]> => {
   const response = await client
     .get(`products/${id}`)
+    .catch(console.error)
 
-  if ( ! response) {
-    console.error('Could not find product')
-    return
+  if ( ! response || ! response.data) {
+    return [newResponseError(400, 'No response', 'There was no response')]
   }
+
   const data = response.data
 
-  let output: object
+  let output: Product
 
   // Gets the fields from the data that the user requested
   if (cmd.only) {
-    output = {}
     const fields = cmd.only.split(',')
     fields.forEach((f: string) => output[f] = data[f])
   } else {
     output = data
   }
 
-  // If being piped, we need to stringify it
-  if (process.stdout.isTTY) {
-    console.log(output)
-  } else {
-    console.log(JSON.stringify(output))
-  }
+  return output
 }
 
-const getAll = async (): Promise<void> => {
+const gets = async (cmd: any): Promise<Product[] | ResponseError[]> => {
   const response = await client
     .get('products')
+    .catch(console.error)
 
-  console.log(response.data)
+  if ( ! response || ! response.data) {
+    return [newResponseError(400, 'No response', 'There was no response')]
+  }
+
+  return response.data
 }
 
-const update = async (id: string, cmd: any): Promise<void> => {
+const update = async (id: string, cmd: any): Promise<Product | ResponseError[]> => {
   const input: any = await getStdin()
 
   // The ID was piped in from another command
@@ -72,13 +64,17 @@ const update = async (id: string, cmd: any): Promise<void> => {
 
   const response = await client
     .put(`products/${id}`, payload)
+    .catch(console.error)
 
-  console.log(response.data)
+    if ( ! response || ! response.data) {
+      return [newResponseError(400, 'No response', 'There was no response')]
+    }
+
+  return response.data
 }
 
 export default {
   get,
-  getAll,
-  getOne,
+  gets,
   update,
 }
