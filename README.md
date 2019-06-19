@@ -9,43 +9,28 @@ MOLTIN_CLIENT_ID
 MOLTIN_CLIENT_SECRET
 ```
 
-## Authentication
-You can call the authenticate command manually
-`bin/moltin authenticate`
-However, an access token will be automatically created for any request if there isn't one available, or it has expired.
+## Working with resources
 
-## Products
-
-### Get products
+Most resources have 6 basic methods: `index`, `get`, `create`, `update`, `destroy`, `attributes`
+These methods are called by specifying the resource name and then the method prefixed with a colon
 ```
-./bin/run products
+bin/run products:update
+bin/run products:get
 ```
-
-### Get a product
+In the case of index, you can omit the command or use `all`
 ```
-./bin/run products:get {uuid}
-```
-You can specify an `only` argument to only return specific fields in the output (useful for piping)
-```
-./bin/run products:get {uuid} --only 'id,name'
+bin/run products
+bin/run products:all
 ```
 
-### Update a product
-```
-./bin/run products:update {uuid} --name "Product name"
-```
-You can also update a product via a JSON string
-```
-./bin/run products:update {uuid} --json '{"name": "Product name"}'
-```
-or you can specify a JSON file
-```
-./bin/run products:update {uuid} --file ~/Desktop/data.json
-```
+## Flags
+
+Flags are specific to the method call. For example, **create** and **update** allow flags such as `--json` or `--file`, while **get** or **index** methods allow the `--only` flag. Use `--help` to get more information about the supported flags per command.
+
 ## Piping
 
 You can pipe the output of one command in to another.
 For example, to update a product, you can grab the ID from the products command, which will be used in the update command:
 ```
-./bin/run products {uuid} | ./bin/run products:update --name "Product name"
+bin/run products {uuid} | bin/run products:update --name "Product name"
 ```
