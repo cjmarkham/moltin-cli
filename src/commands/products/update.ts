@@ -1,15 +1,13 @@
-import { Command, flags } from '@oclif/command'
+import { flags } from '@oclif/command'
 import { Input } from '@oclif/parser/lib/flags'
 import { IArg } from '@oclif/parser/lib/args'
 
 import client from '../../helpers/client'
-import { getStdin } from '../../helpers/process'
 import { Product } from '../../schemas'
-import { parseOutput } from '../../helpers/output'
 import { payloadFromJson, payloadFromFile } from '../../helpers/payload'
-import { panic, log } from '../../helpers/logger'
+import Base from '../base'
 
-export default class ProductsUpdate extends Command {
+export default class ProductsUpdate extends Base {
   static args: IArg<string>[] = [
     { name: 'id' },
   ]
@@ -25,17 +23,16 @@ export default class ProductsUpdate extends Command {
   ]
 
   static flags: Input<any> = {
-    help: flags.help({ char: 'h' }),
+    ...Base.flags,
     json: flags.string({ char: 'j', description: 'A JSON object of attributes to update' }),
-    only: flags.string({ char: 'o', description: 'Only return a subset of fields' }),
     file: flags.string({ char: 'f', description: 'A JSON file of update fields' }),
   }
 
   async run(): Promise<void> {
-    const { args, flags: { json, file, only } } = this.parse(ProductsUpdate)
+    const { args, flags: { json, file } } = this.parse(ProductsUpdate)
     let id: string = args.id
 
-    const input: any = await getStdin()
+    const input: any = await this.getStdin()
     // The ID was piped in from another command
     if (input && input.id) {
       id = input.id
@@ -50,7 +47,7 @@ export default class ProductsUpdate extends Command {
     }
 
     if (Object.keys(payload).length === 0) {
-      log(400, 'Please specify a payload')
+      this.output(400, 'Please specify a payload')
       process.exit(1)
     }
 
@@ -61,11 +58,11 @@ export default class ProductsUpdate extends Command {
       .catch((err) => err)
 
     if (errors) {
-      panic(errors)
+      this.panic(errors)
       process.exit(1)
     }
 
-    const output: Product = parseOutput(data, only)
-    log(200, 'Updated product', output)
+    const output: Product = this.parseOutput(data)
+    this.output(200, 'Updated product', output)
   }
 }

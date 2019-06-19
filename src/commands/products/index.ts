@@ -1,13 +1,11 @@
-import { Command, flags } from '@oclif/command'
+import { flags } from '@oclif/command'
 import { Input } from '@oclif/parser/lib/flags'
-import cli from 'cli-ux'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
-import { parseOutput } from '../../helpers/output'
-import { panic, log } from '../../helpers/logger'
+import Base from '../base'
 
-export default class ProductsIndex extends Command {
+export default class ProductsIndex extends Base {
   static description: string = 'Gets all products'
 
   static aliases: string[] = ['products:all']
@@ -18,23 +16,20 @@ export default class ProductsIndex extends Command {
   ]
 
   static flags: Input<any> = {
-    help: flags.help({ char: 'h' }),
-    only: flags.string({ char: 'o', description: 'Only return a subset of fields' }),
+    ...Base.flags,
   }
 
   async run(): Promise<void> {
-    const { flags: { only } } = this.parse(ProductsIndex)
-
     const { data, errors } = await client
       .get(`products`)
       .catch((err) => err)
 
     if (errors) {
-      panic(errors)
+      this.panic(errors)
       process.exit(1)
     }
 
-    const output: Product = parseOutput(data, only)
-    log(200, 'Got products', output)
+    const output: Product = this.parseOutput(data)
+    this.output(200, 'Got products', output)
   }
 }

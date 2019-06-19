@@ -1,31 +1,23 @@
-/**
- * Plucks only requested fields from a response
- * @param data
- * @param only
- */
-const parseOutput = (data: any, only?: string): any => {
-  let output: any = {}
+import chalk from 'chalk'
 
-  // Gets the fields from the data that the user requested
-  if (only) {
-    const fields: string[] = only.split(',')
-    if (Array.isArray(data)) {
-      output = []
-      for (const d of data) {
-        const resource = {}
-        fields.forEach((f: string) => resource[f] = d[f])
-        output.push(resource)
-      }
-    } else {
-      fields.forEach((f: string) => output[f] = data[f])
-    }
-  } else {
-    output = data
+const statusColor = (status: number) => {
+  let color: string = 'whiteBright'
+
+  switch (true) {
+    case status >= 200 && status < 300:
+      color = 'greenBright'
+      break
+    case status >= 400 && status < 500:
+      color = 'yellowBright'
+      break
+    case status >= 500:
+      color = 'redBright'
+      break
   }
 
-  return output
+  return chalk[color](status)
 }
 
 export {
-  parseOutput,
+  statusColor,
 }

@@ -1,10 +1,10 @@
-import { Command, flags } from '@oclif/command'
+import { flags } from '@oclif/command'
 import { Input } from '@oclif/parser/lib/flags'
 
 import client from '../../helpers/client'
-import { panic, log } from '../../helpers/logger'
+import Base from '../base';
 
-export default class ProductsAttributes extends Command {
+export default class ProductsAttributes extends Base {
   static description: string = 'Gets product attributes'
 
   static examples: string[] = [
@@ -12,7 +12,7 @@ export default class ProductsAttributes extends Command {
   ]
 
   static flags: Input<any> = {
-    help: flags.help({ char: 'h' }),
+    ...Base.flags,
   }
 
   async run(): Promise<void> {
@@ -21,10 +21,10 @@ export default class ProductsAttributes extends Command {
       .catch((err) => err)
 
     if (errors) {
-      panic(errors)
+      this.panic(errors)
       process.exit(1)
     }
 
-    log(200, 'Got product attributes', data)
+    this.output(200, 'Got product attributes', data)
   }
 }

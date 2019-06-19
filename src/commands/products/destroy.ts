@@ -1,11 +1,10 @@
-import { Command, flags } from '@oclif/command'
 import { IArg } from '@oclif/parser/lib/args'
 import { Input } from '@oclif/parser/lib/flags'
 
 import client from '../../helpers/client'
-import { panic, log } from '../../helpers/logger'
+import Base from '../base'
 
-export default class ProductsDestroy extends Command {
+export default class ProductsDestroy extends Base {
   static args: IArg<string>[] = [
     { name: 'id' },
   ]
@@ -17,7 +16,7 @@ export default class ProductsDestroy extends Command {
   ]
 
   static flags: Input<any> = {
-    help: flags.help({ char: 'h' }),
+    ...Base.flags,
   }
 
   async run(): Promise<void> {
@@ -28,10 +27,10 @@ export default class ProductsDestroy extends Command {
       .catch((err) => err)
 
     if (errors) {
-      panic(errors)
+      this.panic(errors)
       process.exit(1)
     }
 
-    log(204, 'Product has been deleted')
+    this.output(204, 'Product has been deleted')
   }
 }
