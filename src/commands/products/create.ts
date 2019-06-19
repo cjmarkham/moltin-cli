@@ -1,28 +1,20 @@
 import { Command, flags } from '@oclif/command'
 import { Input } from '@oclif/parser/lib/flags'
-import { IArg } from '@oclif/parser/lib/args'
 import chalk from 'chalk'
 
 import client from '../../helpers/client'
-import { getStdin } from '../../helpers/process'
 import { Product } from '../../schemas'
 import { parseOutput } from '../../helpers/output'
 import { payloadFromJson, payloadFromFile } from '../../helpers/payload'
 import { panic, log } from '../../helpers/logger'
 
-export default class ProductsUpdate extends Command {
-  static args: IArg<string>[] = [
-    { name: 'id' },
-  ]
-
-  static description: string = 'Updates a product'
+export default class ProductsCreate extends Command {
+  static description: string = 'Creates a product'
 
   static examples: string[] = [
-    `moltin products:update {uuid}`,
-    `moltin products:update {uuid} -n 'Some name'`,
-    `moltin products:update {uuid} -j {name: 'Some name'}`,
-    `moltin products:update {uuid} -f path/to/json/file`,
-    `moltin products:get {uuid} | moltin products:update -n "Some name"`,
+    `moltin products:create -n 'Some name'`,
+    `moltin products:create -j {name: 'Some name'}`,
+    `moltin products:create -f path/to/json/file`,
   ]
 
   static flags: Input<any> = {
@@ -33,14 +25,7 @@ export default class ProductsUpdate extends Command {
   }
 
   async run(): Promise<void> {
-    const { args, flags: { json, file, only } } = this.parse(ProductsUpdate)
-    let id: string = args.id
-
-    const input: any = await getStdin()
-    // The ID was piped in from another command
-    if (input && input.id) {
-      id = input.id
-    }
+    const { flags: { json, file, only } } = this.parse(ProductsCreate)
 
     let payload: any = {}
 
@@ -55,10 +40,10 @@ export default class ProductsUpdate extends Command {
       process.exit(1)
     }
 
-    payload = { ...payload, id, type: 'product' }
+    payload.type = 'product'
 
     const { data, errors } = await client
-      .put(`products/${id}`, payload)
+      .post(`products`, payload)
       .catch((err) => err)
 
     if (errors) {
@@ -67,6 +52,6 @@ export default class ProductsUpdate extends Command {
     }
 
     const output: Product = parseOutput(data, only)
-    log(200, 'Updated product', output)
+    log(201, 'Product created', output)
   }
 }

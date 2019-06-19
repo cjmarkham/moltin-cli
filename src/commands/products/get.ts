@@ -4,7 +4,8 @@ import { Input } from '@oclif/parser/lib/flags'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
-import { parseOutput } from '../../helpers/output';
+import { parseOutput } from '../../helpers/output'
+import { panic, log } from '../../helpers/logger'
 
 export default class ProductsGet extends Command {
   static args: IArg<string>[] = [
@@ -24,20 +25,21 @@ export default class ProductsGet extends Command {
   }
 
   async run(): Promise<void> {
-    const { args, flags } = this.parse(ProductsGet)
+    const { args, flags: { only } } = this.parse(ProductsGet)
 
-    const response = await client
+    const { errors, data } = await client
       .get(`products/${args.id}`)
-      .catch(console.error)
+      .catch((err) => err)
 
-    if ( ! response || ! response.data) {
+    if (errors) {
+      panic(errors)
       process.exit(1)
     }
 
-    const output: Product = parseOutput(response.data, flags.only)
+    const output: Product = parseOutput(data, only)
 
     if (process.stdout.isTTY) {
-      console.log(output)
+      log(200, 'Got product', output)
     } else {
       console.log(JSON.stringify(output))
     }

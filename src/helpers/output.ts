@@ -1,7 +1,10 @@
-import { Product } from "../schemas";
-
-const parseOutput = (data: Product, only?: string): Product => {
-  let output: Product = {} as Product
+/**
+ * Plucks only requested fields from a response
+ * @param data
+ * @param only
+ */
+const parseOutput = (data: any, only?: string): any => {
+  let output: any = {}
 
   // Gets the fields from the data that the user requested
   if (only) {
