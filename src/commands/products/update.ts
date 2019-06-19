@@ -1,7 +1,6 @@
 import { Command, flags } from '@oclif/command'
 import { Input } from '@oclif/parser/lib/flags'
 import { IArg } from '@oclif/parser/lib/args'
-import chalk from 'chalk'
 
 import client from '../../helpers/client'
 import { getStdin } from '../../helpers/process'

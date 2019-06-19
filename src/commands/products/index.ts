@@ -1,5 +1,6 @@
 import { Command, flags } from '@oclif/command'
 import { Input } from '@oclif/parser/lib/flags'
+import cli from 'cli-ux'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
@@ -8,6 +9,8 @@ import { panic, log } from '../../helpers/logger'
 
 export default class ProductsIndex extends Command {
   static description: string = 'Gets all products'
+
+  static aliases: string[] = ['products:all']
 
   static examples: string[] = [
     `moltin products`,

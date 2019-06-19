@@ -1,6 +1,5 @@
 import { Command, flags } from '@oclif/command'
 import { Input } from '@oclif/parser/lib/flags'
-import chalk from 'chalk'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
