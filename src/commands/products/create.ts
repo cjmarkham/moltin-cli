@@ -3,8 +3,7 @@ import { Input } from '@oclif/parser/lib/flags'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
-import { payloadFromJson, payloadFromFile } from '../../helpers/payload'
-import Base from '../base';
+import Base from '../base'
 
 export default class ProductsCreate extends Base {
   static description: string = 'Creates a product'
@@ -27,9 +26,9 @@ export default class ProductsCreate extends Base {
     let payload: any = {}
 
     if (json) {
-      payload = { ...payload, ...payloadFromJson(json) }
+      payload = { ...payload, ...this.payloadFromJson(json) }
     } else if (file) {
-      payload = { ...payload, ...payloadFromFile(file) }
+      payload = { ...payload, ...this.payloadFromFile(file) }
     }
 
     if (Object.keys(payload).length === 0) {

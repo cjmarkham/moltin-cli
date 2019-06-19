@@ -1,6 +1,7 @@
 import Command, { flags } from "@oclif/command"
 import chalk from 'chalk'
 import { Input } from "@oclif/parser/lib/flags"
+import * as fs from 'fs'
 
 import { statusColor } from "../helpers/output"
 
@@ -10,7 +11,7 @@ export default abstract class extends Command {
     only: flags.string({ char: 'o', description: 'Only return a subset of fields' }),
   }
 
-  _flags
+  _flags: any
 
   async init () {
     const { flags } = this.parse()
@@ -25,7 +26,7 @@ export default abstract class extends Command {
 
       if (stdin.isTTY) {
         resolve({})
-        return;
+        return
       }
 
       stdin.setEncoding('utf8')
@@ -69,6 +70,32 @@ export default abstract class extends Command {
     }
 
     return output
+  }
+
+  payloadFromJson(json: string) {
+    let fields: object
+    try {
+      fields = JSON.parse(json)
+    } catch (e) {
+      console.error(chalk.redBright('Could not parse JSON from --json flag'))
+      process.exit(1)
+    }
+
+    return fields
+  }
+
+  payloadFromFile(path: string) {
+    const buffer = fs.readFileSync(path)
+    let json: object
+
+    try {
+      json = JSON.parse(buffer.toString())
+    } catch (e) {
+      console.error(chalk.redBright(`Could not parse JSON from ${path}`))
+      process.exit(1)
+    }
+
+    return json
   }
 
   output(status: number, title: string, data?: object) {

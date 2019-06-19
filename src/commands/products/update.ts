@@ -4,7 +4,6 @@ import { IArg } from '@oclif/parser/lib/args'
 
 import client from '../../helpers/client'
 import { Product } from '../../schemas'
-import { payloadFromJson, payloadFromFile } from '../../helpers/payload'
 import Base from '../base'
 
 export default class ProductsUpdate extends Base {
@@ -41,9 +40,9 @@ export default class ProductsUpdate extends Base {
     let payload: any = {}
 
     if (json) {
-      payload = { ...payload, ...payloadFromJson(json) }
+      payload = { ...payload, ...this.payloadFromJson(json) }
     } else if (file) {
-      payload = { ...payload, ...payloadFromFile(file) }
+      payload = { ...payload, ...this.payloadFromFile(file) }
     }
 
     if (Object.keys(payload).length === 0) {
